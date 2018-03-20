@@ -1,12 +1,109 @@
 doctype html
 html
   head
-    title Lets talk about ... Template
+    title Lets talk about ... Elixir beside Rails
     meta(charset='utf-8')
     script(src='assets/vendor/slides.js')
     link(href='styles.css'  rel='stylesheet' type='text/css')
   body
     section.slides.layout-regular.template-default
+      article.section
+        h2 Lets talk about...
+        h1 Elixir beside Rails
+      article
+        h2 What I'm going to talk about
+        ul.build
+          li Elixir and Phoenix
+          li Channels in Phoenix vs ActionCable in Rails
+          li Connecting Phoenix and Rails
+          li Chat Application overview
+          li Code overview
+      article.section
+        h2 Elixir and Phoenix
+      article
+        h2 Elixir
+        ul.build
+          li Functional
+          li Leverages Erlang VM
+          li Fault-tolerance
+          li Scalability
+          li Ruby-like syntax
+          li A lot more...
+      article
+        h2 Code example
+        pre
+          |defmodule Sample do
+          |  def hello(name), do: "Hello, #{name}"
+          |  def hello, do: "Hello, nameless"
+          |end
+          |
+          |IO.puts Sample.hello("Dany") # Hello, Dany
+          |IO.puts Sample.hello # Hello, nameless
+      article
+        h2 Phoenix
+        ul.build
+          li MVC framework
+          li Mostly Elixir
+          li Productivity
+          li Explicit > Implicit
+          li A lot more...
+      article
+        h2 Code example
+        pre
+          |plug :find_user
+          |
+          |def show(conn, %{"id" => id}) do
+          |  post = conn.assigns.user |> assoc(:posts) |> Repo.get(id)
+          |  render conn, "show.html", post: post
+          |end
+          |
+          |defp find_user(conn, _) do
+          |  assign(conn, :user, Repo.get(User, conn.params["user_id"]))
+          |end
+          //- |defmodule ElChatWeb.Router do
+          //- |  use ElChatWeb, :router
+          //- |
+          //- |  pipeline :browser do
+          //- |    plug :accepts, ["html"]
+          //- |    plug :fetch_session
+          //- |    plug :fetch_flash
+          //- |    plug :protect_from_forgery
+          //- |    plug :put_secure_browser_headers
+          //- |  end
+          //- |
+          //- |  pipeline :api do
+          //- |    plug :accepts, ["json"]
+          //- |  end
+          //- |
+          //- |  scope "/", ElChatWeb do
+          //- |    pipe_through :browser
+          //- |    get "/", PageController, :index
+          //- |  end
+          //- |end
+      article.section
+        h2 Channels in Phoenix
+        h2 vs
+        h2 ActionCable in Rails
+      article
+        h2 What can channels do
+        ul.build
+          li Phoenix Channels can handle 2m connections on one server...
+          li ...really huge server (40core/128gb)...
+          li ...with code tuned and optimized by core members...
+          li ...but still very impressive!
+      article
+        h2 What problems does Active Cable have
+        ul.build
+          li Memory leaks
+          li Ruby(and Rails) is slow
+          li PubSub problem
+      article.section
+        h2 Chat Application overview
+      article.section
+        h2 Code overview
+
+
+
       article
         h1 H1
         h2 H2
