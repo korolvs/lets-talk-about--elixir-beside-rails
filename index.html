@@ -1,4 +1,4 @@
-<!DOCTYPE html><html><head><title>Lets talk about ... Elixir beside Rails</title><meta charset="utf-8"><script src="assets/vendor/slides.js"></script><link href="styles.css" rel="stylesheet" type="text/css"></head><body><section class="slides layout-regular template-default"><article class="section"><h2>Lets talk about...</h2><h1>Elixir beside Rails</h1></article><article><h2>What I'm going to talk about</h2><ul class="build"><li>Elixir and Phoenix</li><li>Channels in Phoenix vs ActionCable in Rails</li><li>Connecting Phoenix and Rails</li><li>Chat Application overview</li><li>Code overview</li></ul></article><article class="section"><h2>Elixir and Phoenix</h2></article><article><h2>Elixir</h2><ul class="build"><li>Functional</li><li>Leverages Erlang VM</li><li>Fault-tolerance</li><li>Scalability</li><li>Ruby-like syntax</li><li>A lot more...</li></ul></article><article><h2>Code example</h2><pre>defmodule Sample do
+<!DOCTYPE html><html><head><title>Lets talk about ... Elixir beside Rails</title><meta charset="utf-8"><script src="assets/vendor/slides.js"></script><link href="styles.css" rel="stylesheet" type="text/css"></head><body><section class="slides layout-regular template-default"><article class="section"><h2>Lets talk about...</h2><h1>Elixir beside Rails</h1></article><article><h2>What I'm going to talk about</h2><ul class="build"><li>Elixir and Phoenix</li><li>Channels in Phoenix vs Action Cable in Rails</li><li>Connecting Phoenix and Rails</li><li>Chat Application overview</li><li>Code overview</li></ul></article><article class="section"><h2>Elixir and Phoenix</h2></article><article><h2>Elixir</h2><ul class="build"><li>Functional</li><li>Leverages Erlang VM</li><li>Fault-tolerance</li><li>Scalability</li><li>Ruby-like syntax</li><li>A lot more...</li></ul></article><article><h2>Code example</h2><pre>defmodule Sample do
  def hello(name), do: "Hello, "
  def hello, do: "Hello, nameless"
 end
@@ -13,6 +13,37 @@ end
 
 defp find_user(conn, _) do
  assign(conn, :user, Repo.get(User, conn.params["user_id"]))
-end</pre></article><article class="section"><h2>Channels in Phoenix</h2><h2>vs</h2><h2>ActionCable in Rails</h2></article><article><h2>What can channels do</h2><ul class="build"><li>Phoenix Channels can handle 2m connections on one server...</li><li>...really huge server (40core/128gb)...</li><li>...with code tuned and optimized by core members...</li><li>...but still very impressive!</li></ul></article><article><h2>What problems does Active Cable have</h2><ul class="build"><li>Memory leaks</li><li>Ruby(and Rails) is slow</li><li>PubSub problem</li></ul></article><article class="section"><h2>Chat Application overview</h2></article><article class="section"><h2>Code overview</h2></article><article><h1>H1</h1><h2>H2</h2></article><article class="image" data-src="assets/memes/philosoraptor.jpg"><h1>Background Image</h1></article><article class="image cover" data-src="assets/memes/philosoraptor.jpg"><h1>Cover Image</h1></article><article><ul><li>Inline Image</li><li><img src="assets/memes/like-a-boss.jpg"></li></ul></article><article><h2>List</h2><ul class="build"><li>1.</li><li>2.</li><li>3.</li><li>4.</li></ul></article><article><h2>Code</h2><pre>const code = 'without line numbers';</pre><pre class="linenums">const code = 'with line numbers';</pre></article><article><h2>Code with highlights</h2><pre class="linenums h1">const line1 = 'normal'
-const line2 = 'highlight'
-const line3 = 'normal'</pre></article><article class="section"><h1>New Section</h1></article><article><ul><li><em>Emphasis</em></li><li><i>Italic</i></li><li>Inline <em>Emphasis</em> and <i>Italic</i></li><li><a href="#">Link</a></li></ul></article><article><video src="#" loop controls></video></article></section><script src="assets/scripts/main.js"></script></body></html>
+end</pre></article><article class="section"><h2>Channels in Phoenix</h2><h2>vs</h2><h2>Action Cable in Rails</h2></article><article><h2>What can Phoenix channels do</h2><ul class="build"><li>Phoenix Channels can handle 2m connections on one server...</li><li>...really huge server (40core/128gb)...</li><li>...with code tuned and optimized by core members...</li><li>...but still very impressive!</li></ul></article><article><h2>What problems does Active Cable have</h2><ul class="build"><li>Memory leaks</li><li>Ruby(and Rails) is slow</li><li>Scalability</li></ul></article><article class="image" data-src="assets/images/comparsion.png"></article><article class="section"><h2>Chat Application overview</h2></article><article><h2>El Chat</h2><ul class="build"><li>Send messages to other users</li><li>Save messages</li><li>Unread message notifications</li></ul></article><article><h2>What you need to add to existing App</h2><pre>ElChatCredentials = {
+ user_id: 1,
+ user_name: 'Slava',
+ token: 'n2pUi8275EgJYFlv2o5vfjc8rFipbaknwK3knQ0hUPVU='
+};
+
+ElChatUsers = [...];
+ElChatUrl = "ws://server_url/socket";
+startElChat();</pre></article><article><h2>Message</h2><ul class="build"><li>ID</li><li>Room</li><li>User ID</li><li>Opponent ID</li><li>Sent at</li><li>Text</li></ul></article><article class="image" data-src="assets/images/chat1.png"></article><article class="image" data-src="assets/images/chat2.png"></article><article class="section"><h2>Code overview</h2></article><article><h2>Authentication</h2><pre>def connect(%{"token" => token, "user_id" => user_id, "user_name" => user_name}, socket) do
+ if Helper.ensure_hash(token, ":") do
+   {:ok, socket |> assign(:user_id, user_id)}
+ else
+   {:error, %{reason: "unauthorized"}}
+ end
+end</pre></article><article><h2>Unread messages</h2><pre>def handle_info(:after_join, socket) do
+ users = from(m in Message,
+   where: (m.opponent_id == ^socket.assigns.user_id and m.is_delivered == false),
+   select: m.user_id,
+   distinct: true)
+   |> Repo.all
+ push socket, "init:usr", %{users: users}
+ {:noreply, socket}
+end</pre></article><article><h2>Handle new messages</h2><pre style="font-size:2vw">def handle_in("new:msg", msg, socket) do
+ ...
+ case Message.changeset(%Message{}, changes) |> Repo.insert do
+   {:ok, message} ->
+     broadcast! socket, "new:msg", message
+     if Enum.count(Presence.list(socket)) == 1 do
+       ElChatWeb.Endpoint.broadcast!("user:", "new:msg", %{user_id: socket.assigns.user_id})
+     end
+   {:error, _changeset} -> nil
+ end
+ {:reply, :ok, socket}
+end</pre></article><article class="section"><h2>Whats next</h2></article><article><h2>About Elixir and Phoenix</h2><ul class="build"><li><a href="https://medium.com/@korolvs/elixir-beside-rails">medium.com/@korolvs/elixir-beside-rails</a></li><li><a href="https://elixir-lang.org/">elixir-lang.org</a></li><li><a href="http://phoenixframework.org/">phoenixframework.org</a></li><li><a href="http://phoenixframework.org/blog/the-road-to-2-million-websocket-connections">phoenixframework.org/blog/the-road-to-2-million-websocket-connections</a></li><li><a href="https://dockyard.com/blog/2016/08/09/phoenix-channels-vs-rails-action-cable">dockyard.com/blog/2016/08/09/phoenix-channels-vs-rails-action-cable</a></li></ul></article><article><h2>About me</h2><ul class="build"><li><a href="http://korolvs.com">korolvs.com</a></li><li><a href="http://medium.com/@korolvs">medium.com/@korolvs</a></li><li><a href="https://github.com/korolvs">github.com/korolvs</a></li></ul></article><article class="section"><h2>Thank you</h2></article></section><script src="assets/scripts/main.js"></script></body></html>

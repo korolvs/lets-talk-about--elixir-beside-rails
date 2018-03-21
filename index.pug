@@ -14,7 +14,7 @@ html
         h2 What I'm going to talk about
         ul.build
           li Elixir and Phoenix
-          li Channels in Phoenix vs ActionCable in Rails
+          li Channels in Phoenix vs Action Cable in Rails
           li Connecting Phoenix and Rails
           li Chat Application overview
           li Code overview
@@ -60,32 +60,12 @@ html
           |defp find_user(conn, _) do
           |  assign(conn, :user, Repo.get(User, conn.params["user_id"]))
           |end
-          //- |defmodule ElChatWeb.Router do
-          //- |  use ElChatWeb, :router
-          //- |
-          //- |  pipeline :browser do
-          //- |    plug :accepts, ["html"]
-          //- |    plug :fetch_session
-          //- |    plug :fetch_flash
-          //- |    plug :protect_from_forgery
-          //- |    plug :put_secure_browser_headers
-          //- |  end
-          //- |
-          //- |  pipeline :api do
-          //- |    plug :accepts, ["json"]
-          //- |  end
-          //- |
-          //- |  scope "/", ElChatWeb do
-          //- |    pipe_through :browser
-          //- |    get "/", PageController, :index
-          //- |  end
-          //- |end
       article.section
         h2 Channels in Phoenix
         h2 vs
-        h2 ActionCable in Rails
+        h2 Action Cable in Rails
       article
-        h2 What can channels do
+        h2 What can Phoenix channels do
         ul.build
           li Phoenix Channels can handle 2m connections on one server...
           li ...really huge server (40core/128gb)...
@@ -96,57 +76,103 @@ html
         ul.build
           li Memory leaks
           li Ruby(and Rails) is slow
-          li PubSub problem
+          li Scalability
+      article.image(data-src="assets/images/comparsion.png")
       article.section
         h2 Chat Application overview
+      article
+        h2 El Chat
+        ul.build
+          li Send messages to other users
+          li Save messages
+          li Unread message notifications
+      article
+        h2 What you need to add to existing App
+        pre
+          |ElChatCredentials = {
+          |  user_id: 1,
+          |  user_name: 'Slava',
+          |  token: 'n2pUi8275EgJYFlv2o5vfjc8rFipbaknwK3knQ0hUPVU='
+          |};
+          |
+          |ElChatUsers = [...];
+          |ElChatUrl = "ws://server_url/socket";
+          |startElChat();
+      article
+        h2 Message
+        ul.build
+          li ID
+          li Room
+          li User ID
+          li Opponent ID
+          li Sent at
+          li Text
+      article.image(data-src="assets/images/chat1.png")
+      article.image(data-src="assets/images/chat2.png")
       article.section
         h2 Code overview
-
-
-
       article
-        h1 H1
-        h2 H2
-      article.image(data-src="assets/memes/philosoraptor.jpg")
-        h1 Background Image
-      article.image.cover(data-src="assets/memes/philosoraptor.jpg")
-        h1 Cover Image
-      article
-        ul
-          li Inline Image
-          li
-            img(src="assets/memes/like-a-boss.jpg")
-      article
-        h2 List
-        ul.build
-          li 1.
-          li 2.
-          li 3.
-          li 4.
-      article
-        h2 Code
+        h2 Authentication
         pre
-          | const code = 'without line numbers';
-        pre.linenums
-          | const code = 'with line numbers';
+          |def connect(%{"token" => token, "user_id" => user_id, "user_name" => user_name}, socket) do
+          |  if Helper.ensure_hash(token, "#{user_id}:#{user_name}") do
+          |    {:ok, socket |> assign(:user_id, user_id)}
+          |  else
+          |    {:error, %{reason: "unauthorized"}}
+          |  end
+          |end
       article
-        h2 Code with highlights
-        pre.linenums.h1
-          | const line1 = 'normal'
-          | const line2 = 'highlight'
-          | const line3 = 'normal'
+        h2 Unread messages
+        pre
+          |def handle_info(:after_join, socket) do
+          |  users = from(m in Message,
+          |    where: (m.opponent_id == ^socket.assigns.user_id and m.is_delivered == false),
+          |    select: m.user_id,
+          |    distinct: true)
+          |    |> Repo.all
+          |  push socket, "init:usr", %{users: users}
+          |  {:noreply, socket}
+          |end
+      article
+        h2 Handle new messages
+        pre(style="font-size:2vw")
+          |def handle_in("new:msg", msg, socket) do
+          |  ...
+          |  case Message.changeset(%Message{}, changes) |> Repo.insert do
+          |    {:ok, message} ->
+          |      broadcast! socket, "new:msg", message
+          |      if Enum.count(Presence.list(socket)) == 1 do
+          |        ElChatWeb.Endpoint.broadcast!("user:#{opponent_id}", "new:msg", %{user_id: socket.assigns.user_id})
+          |      end
+          |    {:error, _changeset} -> nil
+          |  end
+          |  {:reply, :ok, socket}
+          |end
       article.section
-        h1 New Section
+        h2 Whats next
       article
-        ul
+        h2 About Elixir and Phoenix
+        ul.build
           li
-            em Emphasis
+            a(href="https://medium.com/@korolvs/elixir-beside-rails") medium.com/@korolvs/elixir-beside-rails
           li
-            i Italic
-          li Inline <em>Emphasis</em> and <i>Italic</i>
+            a(href="https://elixir-lang.org/") elixir-lang.org
           li
-            a(href="#") Link
+            a(href="http://phoenixframework.org/") phoenixframework.org
+          li
+            a(href="http://phoenixframework.org/blog/the-road-to-2-million-websocket-connections") phoenixframework.org/blog/the-road-to-2-million-websocket-connections
+          li
+            a(href="https://dockyard.com/blog/2016/08/09/phoenix-channels-vs-rails-action-cable") dockyard.com/blog/2016/08/09/phoenix-channels-vs-rails-action-cable
       article
-        video(src="#" loop controls)
+        h2 About me
+        ul.build
+          li
+            a(href="http://korolvs.com") korolvs.com
+          li
+            a(href="http://medium.com/@korolvs") medium.com/@korolvs
+          li
+            a(href="https://github.com/korolvs") github.com/korolvs
+      article.section
+        h2 Thank you
 
     script(src='assets/scripts/main.js')
