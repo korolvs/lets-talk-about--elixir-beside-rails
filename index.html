@@ -22,7 +22,7 @@ end</pre></article><article class="section"><h2>Channels in Phoenix</h2><h2>vs</
 ElChatUsers = [...];
 ElChatUrl = "ws://server_url/socket";
 startElChat();</pre></article><article><h2>Message</h2><ul class="build"><li>ID</li><li>Room</li><li>User ID</li><li>Opponent ID</li><li>Sent at</li><li>Text</li></ul></article><article class="image" data-src="assets/images/chat1.png"></article><article class="image" data-src="assets/images/chat2.png"></article><article class="section"><h2>Code overview</h2></article><article><h2>Authentication</h2><pre>def connect(%{"token" => token, "user_id" => user_id, "user_name" => user_name}, socket) do
- if Helper.ensure_hash(token, ":") do
+ if Helper.ensure_hash(token, "#{user_id}:#{user_name}") do
    {:ok, socket |> assign(:user_id, user_id)}
  else
    {:error, %{reason: "unauthorized"}}
@@ -41,7 +41,7 @@ end</pre></article><article><h2>Handle new messages</h2><pre style="font-size:2v
    {:ok, message} ->
      broadcast! socket, "new:msg", message
      if Enum.count(Presence.list(socket)) == 1 do
-       ElChatWeb.Endpoint.broadcast!("user:", "new:msg", %{user_id: socket.assigns.user_id})
+       ElChatWeb.Endpoint.broadcast!("user:#{opponent_id}", "new:msg", %{user_id: socket.assigns.user_id})
      end
    {:error, _changeset} -> nil
  end
