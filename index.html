@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head><title>Lets talk about ... Elixir beside Rails</title><meta charset="utf-8"><script src="assets/vendor/slides.js"></script><link href="styles.css" rel="stylesheet" type="text/css"></head><body><section class="slides layout-regular template-default"><article class="section"><h2>Lets talk about...</h2><h1>Elixir beside Rails</h1></article><article><h2>What I'm going to talk about</h2><ul class="build"><li>Elixir and Phoenix</li><li>Channels in Phoenix vs Action Cable in Rails</li><li>Connecting Phoenix and Rails</li><li>Chat Application overview</li><li>Code overview</li></ul></article><article class="section"><h2>Elixir and Phoenix</h2></article><article><h2>Elixir</h2><ul class="build"><li>Functional</li><li>Leverages Erlang VM</li><li>Fault-tolerance</li><li>Scalability</li><li>Ruby-like syntax</li><li>A lot more...</li></ul></article><article><h2>Code example</h2><pre>defmodule Sample do
- def hello(name), do: "Hello, "
+ def hello(name), do: "Hello, #{name}"
  def hello, do: "Hello, nameless"
 end
 
